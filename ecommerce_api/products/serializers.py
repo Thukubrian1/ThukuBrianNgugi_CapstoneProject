@@ -10,6 +10,13 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
         return user
+    
+    def update(self, instance, validated_data):
+        # Custom logic for user update (ensure password is properly handled if updated)
+        password = validated_data.get('password', None)
+        if password:
+            instance.set_password(password)
+        return super().update(instance, validated_data)
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:

@@ -1,8 +1,9 @@
-from rest_framework.viewsets import ModelViewSet
+from rest_framework import viewsets
 from rest_framework import permissions, filters
 from .models import Category, Product
 from rest_framework.authtoken.models import Token
 from .serializers import CategorySerializer, ProductSerializer, UserSerializer
+from rest_framework.permissions import AllowAny
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm
@@ -12,8 +13,7 @@ from .forms import CustomUserCreationForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from rest_framework import viewsets
-from .models import Product, CustomUser
-from .serializers import ProductSerializer
+from .models import Product, User
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
@@ -33,6 +33,18 @@ def product_management(request):
 def product_search(request):
     return render(request, 'product-search/search.html')
 
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer 
+    # To allow admins to view and manage all users, but restrict regular users
+    def get_permissions(self):
+        if self.action == 'list' or self.action == 'retrieve':
+            self.permission_classes = [AllowAny]  # Can be accessed by authenticated users
+        elif self.action == 'create':
+            self.permission_classes = [AllowAny]  # Only admins can create users
+        elif self.action in ['update', 'partial_update', 'destroy']:
+            self.permission_classes = [AllowAny]  # Only admins can update or delete users
+        return super().get_permissions()
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
