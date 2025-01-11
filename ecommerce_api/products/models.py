@@ -7,6 +7,7 @@ class CustomUser(AbstractUser):
     pass
 
 class User(AbstractUser):
+    name = models.CharField(max_length=100)
     email = models.EmailField(unique=True)
 
     groups = models.ManyToManyField(
