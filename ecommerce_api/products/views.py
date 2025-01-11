@@ -1,6 +1,6 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, status
 from rest_framework import permissions, filters
-from .models import Category, Product
+from .models import Category, Product, Product, User
 from rest_framework.authtoken.models import Token
 from .serializers import CategorySerializer, ProductSerializer, UserSerializer
 from rest_framework.permissions import AllowAny
@@ -12,10 +12,7 @@ from django.contrib import messages
 from .forms import CustomUserCreationForm
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from rest_framework import viewsets
-from .models import Product, User
 from rest_framework.response import Response
-from rest_framework import status
 from rest_framework.views import APIView
 
 
@@ -75,17 +72,17 @@ class UserLoginAPIView(APIView):
         username = request.data.get("username")
         password = request.data.get("password")
         try:
-            user = CustomUser.objects.get(username=username)
+            user = User.objects.get(username=username)
             if user.check_password(password):
                 # Here you could return a token (JWT, for example)
                 token, created = Token.objects.get_or_create(user=user)
                 return Response({"token": token.key})
             else:
                 return Response({"error": "Invalid credentials"}, status=400)
-        except CustomUser.DoesNotExist:
+        except User.DoesNotExist:
             return Response({"error": "User not found"}, status=404)
 
-        except CustomUser.DoesNotExist:
+        except User.DoesNotExist:
             return Response({
                 "message": "User not found"
             }, status=status.HTTP_404_NOT_FOUND)
